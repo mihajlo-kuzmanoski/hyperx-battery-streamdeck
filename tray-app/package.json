@@ -18,6 +18,8 @@
   "build": {
     "appId": "com.nightfury.hyperx-battery-tray",
     "productName": "HyperX Battery",
+    "npmRebuild": false,
+    "asarUnpack": ["**/node_modules/node-hid/**"],
     "win": {
       "target": [{ "target": "nsis", "arch": ["x64"] }],
       "requestedExecutionLevel": "asInvoker"
