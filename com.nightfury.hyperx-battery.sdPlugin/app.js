@@ -49,37 +49,28 @@ function levelColor(pct) {
 
 function renderKey(state) {
   if (!state.connected) {
-    return toDataUrl(buildSVG({ emoji:'🎧', label:'--', color:'#666666', barWidth:0, charging:false }));
+    return toDataUrl(buildSVG({ label: '--', color: '#666666' }));
   }
   return toDataUrl(buildSVG({
-    emoji:    '🎧',
-    label:    `${state.level}%`,
-    color:    levelColor(state.level),
-    barWidth: state.level,
-    charging: state.charging,
+    label: `${state.level}%`,
+    color: levelColor(state.level),
   }));
 }
 
-function buildSVG({ emoji, label, color, barWidth, charging }) {
-  const shimmer = charging
-    ? `<defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%"   stop-color="${color}"/>
-        <stop offset="50%"  stop-color="#93c5fd"/>
-        <stop offset="100%" stop-color="${color}"/>
-      </linearGradient></defs>` : '';
-  const barFill = charging ? 'url(#g)' : color;
-  const bolt    = charging
-    ? `<text x="130" y="138" font-size="18" text-anchor="end" font-family="Segoe UI Emoji">⚡</text>` : '';
+function buildSVG({ label, color }) {
+  const fontSize = label.length <= 3 ? 64 : 50;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
     <rect width="144" height="144" fill="#000000" rx="12"/>
-    ${shimmer}
-    <text x="72" y="52" font-size="44" text-anchor="middle"
-      dominant-baseline="middle" font-family="Segoe UI Emoji">${emoji}</text>
-    <text x="72" y="104" font-size="38" font-weight="900"
-      text-anchor="middle" fill="${color}" font-family="Consolas,monospace">${label}</text>
-    <rect x="14" y="122" width="116" height="14" rx="6" fill="#222222"/>
-    <rect x="14" y="122" width="${Math.round(barWidth * 1.16)}" height="14" rx="6" fill="${barFill}"/>
-    ${bolt}
+    <defs>
+      <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="6" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <text x="72" y="72" font-size="${fontSize}" font-weight="900"
+      text-anchor="middle" dominant-baseline="middle"
+      fill="${color}" font-family="Consolas,monospace"
+      filter="url(#glow)">${label}</text>
   </svg>`;
 }
 
