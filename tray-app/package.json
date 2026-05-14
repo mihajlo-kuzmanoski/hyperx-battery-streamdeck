@@ -1,0 +1,32 @@
+{
+  "name": "hyperx-battery-tray",
+  "version": "1.0.0",
+  "description": "HyperX Cloud III Wireless battery level in the system tray",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "dependencies": {
+    "node-hid": "^3.1.0"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.nightfury.hyperx-battery-tray",
+    "productName": "HyperX Battery",
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createStartMenuShortcut": true,
+      "createDesktopShortcut": false
+    }
+  }
+}
