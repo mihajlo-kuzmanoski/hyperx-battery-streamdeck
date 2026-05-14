@@ -33,7 +33,7 @@
   ],
   "SDKVersion": 2,
   "Software": {
-    "MinimumVersion": "6.8"
+    "MinimumVersion": "5.0"
   },
   "URL": "https://github.com/mihajlo-kuzmanoski/hyperx-battery-streamdeck"
 }
