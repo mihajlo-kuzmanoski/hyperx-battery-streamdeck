@@ -34,15 +34,20 @@
 
 ## Installation
 
-### From the Elgato Marketplace *(recommended)*
+### Stream Deck Plugin
 
-Search for **"HyperX Battery"** in the Stream Deck software's Plugin Store, or find it on the [Elgato Marketplace](https://marketplace.elgato.com).
+**From the Elgato Marketplace** *(recommended)* — search for **"HyperX Battery"** in the Stream Deck software's Plugin Store, or find it on the [Elgato Marketplace](https://marketplace.elgato.com).
 
-### Manual
-
-1. Download the latest `.streamDeckPlugin` from [Releases](../../releases)
+**Manual:**
+1. Download the latest `.streamDeckPlugin` from [Releases](https://github.com/mihajlo-kuzmanoski/hyperx-battery-streamdeck/releases)
 2. Double-click the file — Stream Deck software installs it automatically
 3. Drag the **HyperX Battery** action onto any key
+
+### Standalone Tray App *(no Stream Deck required)*
+
+1. Download **hyperx-battery-setup.exe** from [Releases](https://github.com/mihajlo-kuzmanoski/hyperx-battery-streamdeck/releases)
+2. Run it — installs automatically, no terminal needed
+3. The battery level appears in your system tray immediately
 
 ---
 
