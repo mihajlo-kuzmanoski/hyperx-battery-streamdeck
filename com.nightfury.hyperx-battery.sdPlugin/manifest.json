@@ -1,0 +1,39 @@
+{
+  "Actions": [
+    {
+      "Icon": "images/action",
+      "Name": "HyperX Battery",
+      "States": [
+        {
+          "Image": "images/action",
+          "TitleAlignment": "middle"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "DisableCaching": true,
+      "UserTitleEnabled": false,
+      "Tooltip": "Shows HyperX Cloud III Wireless battery level",
+      "UUID": "com.nightfury.hyperx-battery.level"
+    }
+  ],
+  "UUID": "com.nightfury.hyperx-battery",
+  "Author": "NightfurY",
+  "Description": "HyperX Cloud III Wireless battery level on your Stream Deck",
+  "Name": "HyperX Battery",
+  "Icon": "images/plugin",
+  "Version": "1.0.0.0",
+  "CodePath": "launcher.bat",
+  "Category": "HyperX Battery",
+  "CategoryIcon": "images/plugin",
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.8"
+  },
+  "URL": "https://github.com/mihajlo-kuzmanoski/hyperx-battery-streamdeck"
+}
