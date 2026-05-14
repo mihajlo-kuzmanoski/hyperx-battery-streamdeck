@@ -24,7 +24,7 @@
   "Version": "1.0.0.0",
   "CodePath": "launcher.bat",
   "Category": "HyperX Battery",
-  "CategoryIcon": "images/plugin",
+  "CategoryIcon": "images/category",
   "OS": [
     {
       "Platform": "windows",
