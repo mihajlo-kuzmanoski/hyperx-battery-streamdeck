@@ -48,6 +48,22 @@ function readBatteryStable() {
 }
 
 // ── Icon (pure-JS PNG, no extra deps) ─────────────────────────
+// 5×7 bitmap font — each entry is 7 row values, 5 bits MSB-first per row
+const FONT = {
+  '0': [14,17,17,17,17,17,14],
+  '1': [4,12,4,4,4,4,14],
+  '2': [14,17,1,6,8,16,31],
+  '3': [14,17,1,6,1,17,14],
+  '4': [2,6,10,18,31,2,2],
+  '5': [31,16,30,1,1,17,14],
+  '6': [14,16,16,30,17,17,14],
+  '7': [31,1,1,2,4,8,8],
+  '8': [14,17,17,14,17,17,14],
+  '9': [14,17,17,15,1,17,14],
+  '%': [25,26,4,8,19,3,3],
+  '-': [0,0,0,31,0,0,0],
+};
+
 function createIcon(level, connected) {
   const crcT = new Uint32Array(256);
   for (let i = 0; i < 256; i++) {
@@ -68,25 +84,56 @@ function createIcon(level, connected) {
   };
 
   const W = 32, H = 32;
-  const px = Buffer.alloc(W * H * 4);
+  const [r, g, b] = !connected  ? [85, 85, 85] :
+                    level > 50  ? [74, 222, 128] :
+                    level > 20  ? [251, 191, 36] : [239, 68, 68];
 
-  const BG = [18, 18, 18, 255];
-  const TR = [45, 45, 45, 255];
-  const FL = !connected  ? [85, 85, 85, 255] :
-             level > 50  ? [74, 222, 128, 255] :
-             level > 20  ? [251, 191, 36, 255] : [239, 68, 68, 255];
+  const GW = 5, GH = 7, SP = 1;
+  const text = connected ? `${level}%` : '--';
+  const textW = text.length * GW + (text.length - 1) * SP;
+  const ox0 = Math.floor((W - textW) / 2);
+  const oy0 = Math.floor((H - GH) / 2);
 
-  // Thin battery bar centered vertically, full width
-  const TX = 2, TY = 13, TW = 28, TH = 6;
-  const fw = connected ? Math.max(1, Math.round(TW * level / 100)) : 0;
+  // Collect lit pixel indices
+  const lit = new Set();
+  for (let ci = 0; ci < text.length; ci++) {
+    const glyph = FONT[text[ci]] ?? FONT['-'];
+    const cx = ox0 + ci * (GW + SP);
+    for (let gy = 0; gy < GH; gy++) {
+      const row = glyph[gy];
+      for (let gx = 0; gx < GW; gx++) {
+        if (row & (1 << (GW - 1 - gx))) {
+          const col = cx + gx, py = oy0 + gy;
+          if (py >= 0 && py < H && col >= 0 && col < W)
+            lit.add(py * W + col);
+        }
+      }
+    }
+  }
 
+  // Render with glow: neighbors at distance ≤2 get a falloff alpha
+  const buf = Buffer.alloc(W * H * 4);
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      const i = (y * W + x) << 2;
-      let c = BG;
-      if (y >= TY && y < TY + TH && x >= TX && x < TX + TW)
-        c = x < TX + fw ? FL : TR;
-      px[i] = c[0]; px[i+1] = c[1]; px[i+2] = c[2]; px[i+3] = c[3];
+      const idx = y * W + x;
+      const i = idx << 2;
+      if (lit.has(idx)) {
+        buf[i] = r; buf[i+1] = g; buf[i+2] = b; buf[i+3] = 255;
+      } else {
+        let maxA = 0;
+        for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+          const ny = y + dy, nx = x + dx;
+          if (ny < 0 || ny >= H || nx < 0 || nx >= W || !lit.has(ny * W + nx)) continue;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          const a = d <= 1 ? 160 : d <= 1.5 ? 90 : 40;
+          if (a > maxA) maxA = a;
+        }
+        const t = maxA / 255;
+        buf[i]   = Math.round(18 * (1 - t) + r * t);
+        buf[i+1] = Math.round(18 * (1 - t) + g * t);
+        buf[i+2] = Math.round(18 * (1 - t) + b * t);
+        buf[i+3] = 255;
+      }
     }
   }
 
@@ -97,7 +144,7 @@ function createIcon(level, connected) {
   const raw = Buffer.alloc(H * (W * 4 + 1));
   for (let y = 0; y < H; y++) {
     raw[y * (W * 4 + 1)] = 0; // filter byte
-    px.copy(raw, y * (W * 4 + 1) + 1, y * W * 4, (y + 1) * W * 4);
+    buf.copy(raw, y * (W * 4 + 1) + 1, y * W * 4, (y + 1) * W * 4);
   }
 
   const png = Buffer.concat([

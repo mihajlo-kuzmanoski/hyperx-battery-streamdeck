@@ -21,7 +21,7 @@
   "Description": "HyperX Cloud III Wireless battery level on your Stream Deck",
   "Name": "HyperX Battery",
   "Icon": "images/plugin",
-  "Version": "1.1.0.0",
+  "Version": "1.0.0.0",
   "CodePath": "launcher.bat",
   "Category": "HyperX Battery",
   "CategoryIcon": "images/category",
