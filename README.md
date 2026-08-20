@@ -12,8 +12,10 @@
 
 | Plugin | Device | Transport |
 |---|---|---|
-| [**HyperX Battery**](com.nightfury.hyperx-battery.sdPlugin) | HyperX Cloud III Wireless headset | USB dongle, raw HID |
+| [**HyperX Battery**](com.nightfury.hyperx-battery.sdPlugin) | HyperX Cloud III Wireless headset | USB dongle **or** charging cable, raw HID |
 | [**Mouse Battery**](com.nightfury.mouse-battery.sdPlugin) | Logitech PRO X 2 mouse | Lightspeed receiver **or** charging cable, HID++ 2.0 |
+
+Both report charging, and both keep reading while on the cable.
 
 Extras for the headset: a [system tray app](tray-app-csharp) and a [Rainmeter skin](rainmeter-skin).
 
@@ -77,12 +79,19 @@ Each plugin runs as one Node process, ~58 MB resident.
 
 Open the dongle (VID `0x03F0`, PID `0x05B7`, usage page `0xFF13`), write a
 52-byte request beginning `0x66 0x89`, read the reply. **Byte 4** is the battery
-level; a value above 100 means the headset is off or out of range. Charging is
-not exposed by this protocol at all.
+level; a value above 100 means the headset is off or out of range.
 
 Two things that cost real time to work out: there is **no report-ID prefix** on
 the write, and `setNonBlocking()` must not be called — Windows hidapi doesn't
 support it.
+
+**Charging comes from enumeration, not the payload.** There is no charging bit in
+the response — every byte past the level is zero. But the headset shows up as a
+*second* USB device, PID `0x06B7`, for exactly as long as the charging cable is
+connected, so cable presence is the signal. It vanishes the moment you unplug.
+
+Bytes `2..3` are big-endian millivolts, incidentally: 4189 mV on a full charge,
+settling to 4063 mV once the cable comes out.
 
 ### Logitech PRO X 2 — HID++ 2.0
 

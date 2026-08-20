@@ -30,11 +30,23 @@ failure mode is usually a plausible-but-wrong number rather than an error.
 
 ### HyperX Cloud III Wireless
 
-- VID `0x03F0`, PID `0x05B7`, usage page `0xFF13`
+- VID `0x03F0`, dongle PID `0x05B7`, usage page `0xFF13`
 - Write 52 bytes, `buf[0]=0x66`, `buf[1]=0x89`, rest zeros — **no report-ID prefix**
 - Read: **byte 4** is the level (0–100); `> 100` means off / out of range
-- Charging is **not exposed** by this protocol — always report `false`
 - Never call `setNonBlocking()` — Windows hidapi doesn't support it
+- **Charging is detectable, via enumeration rather than the payload.** The
+  response carries no charging bit — every byte past the level is zero. But the
+  headset appears as a **second USB device, PID `0x06B7`**, for exactly as long
+  as the charging cable is connected. Presence of `0x06B7` = charging. Confirmed
+  by watching an unplug: it vanished on the same 3-second tick the cable came
+  out, and came back on reconnect.
+- Both PIDs answer the same status request with an identical payload, so the
+  cabled interface doubles as a fallback when the dongle is absent
+- Bytes `2..3` are **big-endian millivolts**: 4189 mV at full charge, sagging to
+  4063 mV once the cable was pulled. Not displayed, but useful for sanity checks.
+- Earlier notes in this repo claimed charging was "not exposed by the protocol".
+  That was wrong — it was concluded from the payload alone, without looking at
+  what the USB bus was doing.
 - An earlier spec claiming `[0x21, 0xFF, 0x05]` on usage page `0xFF00` with the
   level at byte 5 is **wrong**
 

@@ -5,21 +5,34 @@ const HID       = require('node-hid');
 
 // ── Constants ────────────────────────────────────────────────
 const VENDOR_ID  = 0x03F0;
-const PRODUCT_ID = 0x05B7;
+const DONGLE_PID = 0x05B7;   // wireless dongle
+const CABLE_PID  = 0x06B7;   // the headset itself, only enumerated while cabled
 const USAGE_PAGE = 0xFF13;
 const POLL_MS    = 60_000;
 
 // ── HID reader ───────────────────────────────────────────────
-function findDevice() {
+// The status response carries no charging bit — every byte past the level is
+// zero. What it does carry is the headset appearing as a second USB device
+// (0x06B7) for as long as the charging cable is connected, so cable presence is
+// the charging signal. Verified by watching the enumeration across an unplug:
+// 0x06B7 vanished on the same tick the cable came out.
+function findDevice(productId) {
   return HID.devices().find(d =>
     d.vendorId  === VENDOR_ID  &&
-    d.productId === PRODUCT_ID &&
+    d.productId === productId  &&
     d.usagePage === USAGE_PAGE
   );
 }
 
+function isCharging() {
+  return Boolean(findDevice(CABLE_PID));
+}
+
 function readBattery() {
-  const info = findDevice();
+  const charging = isCharging();
+  // Either endpoint answers the same status request with the same payload, so
+  // the cabled interface doubles as a fallback if the dongle is unplugged.
+  const info = findDevice(DONGLE_PID) || findDevice(CABLE_PID);
   if (!info) return { connected: false };
   let dev;
   try {
@@ -32,7 +45,9 @@ function readBattery() {
     if (!res || res.length < 5) return { connected: false };
     const level = res[4];
     if (level > 100) return { connected: false };
-    return { connected: true, charging: false, level };
+    // Bytes 2-3 are big-endian millivolts (4189 mV at a full charge, sagging to
+    // 4063 mV once the cable came out) — read but not displayed.
+    return { connected: true, charging, level };
   } catch (_) {
     return { connected: false };
   } finally {
@@ -166,4 +181,12 @@ function connect() {
   ws.on('error', () => process.exit(1));
 }
 
-connect();
+if (require.main === module) {
+  connect();
+} else {
+  // Loaded by the test harness — expose the read layer without opening a socket.
+  module.exports = {
+    findDevice, isCharging, readBattery, readBatteryStable, renderKey, buildSVG,
+    DONGLE_PID, CABLE_PID,
+  };
+}
