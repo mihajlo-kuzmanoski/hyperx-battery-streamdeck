@@ -1,0 +1,38 @@
+{
+  "Actions": [
+    {
+      "Icon": "images/action",
+      "Name": "Mouse Battery",
+      "States": [
+        {
+          "Image": "images/action",
+          "TitleAlignment": "middle"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "DisableCaching": true,
+      "UserTitleEnabled": false,
+      "Tooltip": "Shows Logitech PRO X 2 mouse battery level, wireless or wired",
+      "UUID": "com.nightfury.mouse-battery.level"
+    }
+  ],
+  "UUID": "com.nightfury.mouse-battery",
+  "Author": "NightfurY",
+  "Description": "Logitech PRO X 2 mouse battery level on your Stream Deck",
+  "Name": "Mouse Battery",
+  "Icon": "images/plugin",
+  "Version": "1.0.0.0",
+  "CodePath": "launcher.bat",
+  "Category": "Mouse Battery",
+  "CategoryIcon": "images/category",
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "SDKVersion": 3,
+  "Software": {
+    "MinimumVersion": "6.9"
+  }
+}
